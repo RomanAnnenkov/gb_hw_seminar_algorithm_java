@@ -1,59 +1,95 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class LeftHandedRedBlackTree<V extends Comparable<V>> {
     Node<V> root;
     int size;
 
-    public void add(V v) {
-        Node<V> newNode = new Node<>(v, Colors.RED, null, null);
+    public void add(V value) {
         if (root == null) {
-            newNode.color = Colors.BLACK;
-            root = newNode;
-            size++;
-        }
-
-        if ((root.value.compareTo(newNode.value) > 0) && (root.leftChild == null)) {
-            root.leftChild = newNode;
-            size++;
-        }
-
-        if ((root.value.compareTo(newNode.value) < 0) && (root.rightChild == null)) {
-            root.rightChild = newNode;
-            size++;
+            root = new Node<V>(value, Colors.BLACK, null, null);
+        } else {
+            addNode(root, value);
         }
     }
+
+    private boolean addNode(Node<V> node, V value) {
+        if (value == node.value) {
+            return false;
+        } else {
+            if (value.compareTo(node.value) < 0) {
+                if (node.leftChild != null) {
+                    return addNode(node.leftChild, value);
+                } else {
+                    node.leftChild = new Node<V>(value, Colors.RED, null, null);
+                    size++;
+                    return true;
+                }
+            } else {
+                if (node.rightChild != null) {
+                    return addNode(node.rightChild, value);
+                } else {
+                    node.rightChild = new Node<V>(value, Colors.RED, null, null);
+                    size++;
+                    return true;
+                }
+
+            }
+        }
+    }
+
+
+    private void rotateLeft() {
+
+    }
+
+    private void rotateRight() {
+
+    }
+
+    private void swapColors() {
+
+    }
+
 
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
         List<List<Node<V>>> levelNodes = new ArrayList<>();
         levelNodes.add(new ArrayList<>(List.of(root)));
-        int levels = size / 2;
+        int levels = size / 2 + 1;
 
         for (int i = 0; i < levels; i++) {
             List<Node<V>> nextLevelNodes = new ArrayList<>();
             for (Node<V> node : levelNodes.get(i)) {
-                nextLevelNodes.addAll(node.getChildren());
+                if (node != null) {
+                    nextLevelNodes.addAll(node.getChildren());
+                } else {
+                    nextLevelNodes.add(null);
+                    nextLevelNodes.add(null);
+                }
             }
             levelNodes.add(nextLevelNodes);
         }
-
+        levels = levelNodes.size();
+        String indent = "\t\t";
+        List<Integer> countIndent = new ArrayList<>();
+        int nextInt = 0;
+        for (int i = 0; i < levels; i++) {
+            countIndent.add(nextInt);
+            nextInt += (int)Math.pow(2,i);
+        }
+        Collections.reverse(countIndent);
+        int tmp = 0;
         for (int i = 0; i < levelNodes.size(); i++) {
-            for (int j = 0; j < levelNodes.get(i).size(); j++) {
-                for (int k = 0; k < levels - i; k++) {
-                    result.append("\t");
-                }
-                Node<V> currentNode = levelNodes.get(i).get(j);
-                if (currentNode == null) {
-                    result.append("\t\t");
-                } else {
-                    result.append(currentNode.value)
-//                        .append("-")
-//                        .append(currentNode.color)
-                            .append("\t\t");
-                }
+            result.append(indent.repeat(countIndent.get(i)));
+            for (int k = 0; k < levelNodes.get(i).size(); k++) {
+                Node<V> currentElement = levelNodes.get(i).get(k);
+                result.append(currentElement == null ? "*" : currentElement.value)
+                        .append(indent.repeat(tmp + 1));
             }
+            tmp = countIndent.get(i);
             result.append("\n");
         }
 
