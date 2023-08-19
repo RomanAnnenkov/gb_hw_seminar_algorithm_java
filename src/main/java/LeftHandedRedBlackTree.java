@@ -81,15 +81,15 @@ public class LeftHandedRedBlackTree<V extends Comparable<V>> {
             nextInt += (int)Math.pow(2,i);
         }
         Collections.reverse(countIndent);
-        int tmp = 0;
+        int savedIndentCount = 0;
         for (int i = 0; i < levelNodes.size(); i++) {
             result.append(indent.repeat(countIndent.get(i)));
             for (int k = 0; k < levelNodes.get(i).size(); k++) {
                 Node<V> currentElement = levelNodes.get(i).get(k);
                 result.append(currentElement == null ? "*" : currentElement.value)
-                        .append(indent.repeat(tmp + 1));
+                        .append(indent.repeat(savedIndentCount + 1));
             }
-            tmp = countIndent.get(i);
+            savedIndentCount = countIndent.get(i);
             result.append("\n");
         }
 
