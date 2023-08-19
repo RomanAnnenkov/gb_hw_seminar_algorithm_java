@@ -45,10 +45,14 @@ public class LeftHandedRedBlackTree<V extends Comparable<V>> {
                     result.append("\t");
                 }
                 Node<V> currentNode = levelNodes.get(i).get(j);
-                result.append(currentNode.value)
+                if (currentNode == null) {
+                    result.append("\t\t");
+                } else {
+                    result.append(currentNode.value)
 //                        .append("-")
 //                        .append(currentNode.color)
-                        .append("\t\t");
+                            .append("\t\t");
+                }
             }
             result.append("\n");
         }
@@ -76,12 +80,8 @@ public class LeftHandedRedBlackTree<V extends Comparable<V>> {
 
         private List<Node<V>> getChildren() {
             List<Node<V>> result = new ArrayList<>();
-            if (this.leftChild != null) {
-                result.add(this.leftChild);
-            }
-            if (this.rightChild != null) {
-                result.add(this.rightChild);
-            }
+            result.add(this.leftChild);
+            result.add(this.rightChild);
             return result;
         }
 
