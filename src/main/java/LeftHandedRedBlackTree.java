@@ -8,9 +8,12 @@ public class LeftHandedRedBlackTree<V extends Comparable<V>> {
 
     public void add(V value) {
         if (root == null) {
-            root = new Node<V>(value, Colors.BLACK, null, null);
+            root = new Node<V>(value, Colors.B, null, null);
+            size++;
         } else {
             addNode(root, value);
+            root = balance(root);
+            root.color = Colors.B;
         }
     }
 
@@ -20,17 +23,21 @@ public class LeftHandedRedBlackTree<V extends Comparable<V>> {
         } else {
             if (value.compareTo(node.value) < 0) {
                 if (node.leftChild != null) {
-                    return addNode(node.leftChild, value);
+                    boolean nodeAdded = addNode(node.leftChild, value);
+                    node.leftChild = balance(node.leftChild);
+                    return nodeAdded;
                 } else {
-                    node.leftChild = new Node<V>(value, Colors.RED, null, null);
+                    node.leftChild = new Node<V>(value, Colors.R, null, null);
                     size++;
                     return true;
                 }
             } else {
                 if (node.rightChild != null) {
-                    return addNode(node.rightChild, value);
+                    boolean nodeAdded = addNode(node.rightChild, value);
+                    node.rightChild = balance(node.rightChild);
+                    return nodeAdded;
                 } else {
-                    node.rightChild = new Node<V>(value, Colors.RED, null, null);
+                    node.rightChild = new Node<V>(value, Colors.R, null, null);
                     size++;
                     return true;
                 }
@@ -40,16 +47,57 @@ public class LeftHandedRedBlackTree<V extends Comparable<V>> {
     }
 
 
-    private void rotateLeft() {
-
+    private Node<V> rotateLeft(Node<V> node) {
+        Node<V> right = node.rightChild;
+        node.rightChild = right.leftChild;
+        right.leftChild = node;
+        right.color = node.color;
+        node.color = Colors.R;
+        return right;
     }
 
-    private void rotateRight() {
-
+    private Node<V> rotateRight(Node<V> node) {
+        Node<V> left = node.leftChild;
+        node.leftChild = left.rightChild;
+        left.rightChild = node;
+        left.color = node.color;
+        node.color = Colors.R;
+        return left;
     }
 
-    private void swapColors() {
+    private void swapColors(Node<V> node) {
+        if (node == root) {
+            node.color = Colors.B;
+        } else {
+            node.color = (node.color == Colors.B ? Colors.R : Colors.B);
+        }
+        node.leftChild.color = (node.leftChild.color == Colors.B ? Colors.R : Colors.B);
+        node.rightChild.color = (node.rightChild.color == Colors.B ? Colors.R : Colors.B);
+    }
 
+    private Node<V> balance(Node<V> node) {
+        Node<V> result = node;
+        boolean needBalance;
+        do {
+            needBalance = false;
+            if (result.leftChild != null && result.leftChild.color == Colors.R &&
+                    result.leftChild.leftChild != null && result.leftChild.leftChild.color == Colors.R) {
+                needBalance = true;
+                result = rotateRight(result);
+            }
+            if (result.rightChild != null && result.rightChild.color == Colors.R &&
+                    (result.leftChild == null || result.leftChild.color == Colors.B)) {
+                needBalance = true;
+                result = rotateLeft(result);
+            }
+            if (result.leftChild != null && result.leftChild.color == Colors.R &&
+                    result.rightChild != null && result.rightChild.color == Colors.R){
+                needBalance = true;
+                swapColors(result);
+            }
+        } while (needBalance);
+
+        return result;
     }
 
 
@@ -58,8 +106,7 @@ public class LeftHandedRedBlackTree<V extends Comparable<V>> {
         StringBuilder result = new StringBuilder();
         List<List<Node<V>>> levelNodes = new ArrayList<>();
         levelNodes.add(new ArrayList<>(List.of(root)));
-        int levels = size / 2 + 1;
-
+        int levels = size / 2;
         for (int i = 0; i < levels; i++) {
             List<Node<V>> nextLevelNodes = new ArrayList<>();
             for (Node<V> node : levelNodes.get(i)) {
@@ -78,7 +125,7 @@ public class LeftHandedRedBlackTree<V extends Comparable<V>> {
         int nextInt = 0;
         for (int i = 0; i < levels; i++) {
             countIndent.add(nextInt);
-            nextInt += (int)Math.pow(2,i);
+            nextInt += (int) Math.pow(2, i);
         }
         Collections.reverse(countIndent);
         int savedIndentCount = 0;
@@ -86,7 +133,7 @@ public class LeftHandedRedBlackTree<V extends Comparable<V>> {
             result.append(indent.repeat(countIndent.get(i)));
             for (int k = 0; k < levelNodes.get(i).size(); k++) {
                 Node<V> currentElement = levelNodes.get(i).get(k);
-                result.append(currentElement == null ? "*" : currentElement.value)
+                result.append(currentElement == null ? "*" : currentElement.value + "-" + currentElement.color)
                         .append(indent.repeat(savedIndentCount + 1));
             }
             savedIndentCount = countIndent.get(i);
