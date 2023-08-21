@@ -14,6 +14,7 @@ public class Main {
         stringTree.add("d");
         stringTree.add("b");
         stringTree.add("c");
+        stringTree.add("a");
 
         System.out.println(stringTree);
     }
